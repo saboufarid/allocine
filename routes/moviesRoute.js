@@ -69,8 +69,13 @@ router.post("/api/lists/add", function(req, res) {
           if (err) {
             res.json(getJsonErr("Cette liste existe déjà."));
           } else {
-            lists[movies] = [];
-            res.json(lists);
+            let result = {
+              _id: lists._id,
+              name: lists.name,
+              description: lists.description,
+              movies: []
+            };
+            res.json(result);
           }
         });
       }
@@ -117,7 +122,6 @@ router.get("/api/list/:list", function(req, res) {
         if (err) {
           res.json(getJsonErr(err));
         } else {
-          console.log(movies);
           let result = {
             _id: objlist._id,
             name: objlist.name,
