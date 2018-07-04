@@ -1,5 +1,7 @@
 let express = require("express");
 let axios = require("axios");
+let Lists = require("../models/Lists");
+let Token = require("../models/Token");
 
 let router = express.Router();
 
@@ -15,12 +17,14 @@ router.get("/api/search", function(req, res) {
   let { q, p } = req.query;
   axios
     .get(
-      `https://api.themoviedb.org/3/search/movie?api_key=${
-        process.env.THEMOVIEDB_KEY
-      }&language=fr-FR&query=${q}&page=${p}&include_adult=false`
+      encodeURI(
+        `https://api.themoviedb.org/3/search/movie?api_key=${
+          process.env.THEMOVIEDB_KEY
+        }&language=fr-FR&query=${q}&page=${p}&include_adult=false`
+      )
     )
     .then(function(response) {
-      res.json(response.data);
+      res.json(response.data.results);
     })
     .catch(function(error) {
       res.json(getJsonErr(error));
@@ -37,10 +41,37 @@ router.get("/api/movies/:type", function(req, res) {
       }&language=fr-FR&page=${p}`
     )
     .then(function(response) {
-      res.json(response.data);
+      res.json(response.data.result);
     })
     .catch(function(error) {
       res.json(getJsonErr(error));
+    });
+});
+
+router.post("/api/lists/add", function(req, res) {
+  let { name, description } = req.body;
+  let authorization = req.headers.authorization;
+  let token = authorization.substring("Bearer ".length);
+
+  Token.findOne({ token })
+    .populate("user")
+    .exec(function(err, tokenObj) {
+      if (err) {
+        res.json(getJsonErr(err));
+      } else {
+        let newlists = new Lists({
+          name,
+          description,
+          user: tokenObj.user
+        });
+        newlists.save(function(err, lists) {
+          if (err) {
+            res.json(getJsonErr("Cette liste existe déjà."));
+          } else {
+            res.json(lists);
+          }
+        });
+      }
     });
 });
 
