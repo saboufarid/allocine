@@ -69,6 +69,7 @@ router.post("/api/lists/add", function(req, res) {
           if (err) {
             res.json(getJsonErr("Cette liste existe déjà."));
           } else {
+            lists[movies] = [];
             res.json(lists);
           }
         });
@@ -101,6 +102,32 @@ router.post("/api/movies/add", function(req, res) {
       });
     } else {
       res.json(getJsonErr(`La liste id ${list_id} n'existe pas`));
+    }
+  });
+});
+
+router.get("/api/list/:list", function(req, res) {
+  let { list } = req.params;
+
+  Lists.findOne({ _id: list }).exec(function(err, objlist) {
+    if (err) {
+      res.json(getJsonErr(err));
+    } else if (objlist) {
+      Movies.find({ list }).exec(function(err, movies) {
+        if (err) {
+          res.json(getJsonErr(err));
+        } else {
+          console.log(movies);
+          let result = {
+            _id: objlist._id,
+            name: objlist.name,
+            movies
+          };
+          res.json(result);
+        }
+      });
+    } else {
+      res.json(getJsonErr("Cette liste n'existe pas."));
     }
   });
 });
