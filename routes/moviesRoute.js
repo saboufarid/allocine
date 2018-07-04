@@ -2,6 +2,7 @@ let express = require("express");
 let axios = require("axios");
 let Lists = require("../models/Lists");
 let Token = require("../models/Token");
+let Movies = require("../models/Movies");
 
 let router = express.Router();
 
@@ -73,6 +74,35 @@ router.post("/api/lists/add", function(req, res) {
         });
       }
     });
+});
+
+router.post("/api/movies/add", function(req, res) {
+  let { list_id, id, original_title, poster_path, release_date } = req.body;
+  Lists.findOne({ _id: list_id }).exec(function(err, listsObj) {
+    if (err) {
+      res.json(getJsonErr(err));
+    } else if (listsObj) {
+      let newMovies = new Movies({
+        id,
+        original_title,
+        poster_path,
+        release_date,
+        list: listsObj
+      });
+      newMovies.save(function(err) {
+        if (err) {
+          res.json(getJsonErr("Le film a déjà été ajouté dans cette liste."));
+        } else {
+          res.json({
+            message: "Le film a bien été ajouté.",
+            timestamp: new Date().valueOf()
+          });
+        }
+      });
+    } else {
+      res.json(getJsonErr(`La liste id ${list_id} n'existe pas`));
+    }
+  });
 });
 
 module.exports = router;
