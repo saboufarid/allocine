@@ -2,13 +2,13 @@ let express = require("express");
 
 let router = express.Router();
 
-function getJsonErr(err) {
-  return {
-    error: {
-      message: err
-    }
-  };
-}
+// function getJsonErr(err) {
+//   return {
+//     error: {
+//       message: err
+//     }
+//   };
+// }
 
 // router.get("/api/search?q={recherche}&p={page}", function(req, res) {
 //   let { id } = req.params;
